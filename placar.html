@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Placar Eleições Live 3 Candidatos</title>
+    <style>
+        body {
+            background-color: #1e1e1e;
+            color: white;
+            font-family: 'Impact', 'Arial Black', sans-serif;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        .card {
+            text-align: center;
+            background: #2a2a2a;
+            padding: 25px 15px;
+            border-radius: 20px;
+            width: 28%;
+            border: 2px solid #444;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+
+        .foto {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #fff;
+            margin: 0 auto 15px auto;
+            display: block;
+        }
+
+        .nome {
+            font-size: 26px;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            color: #ffffff;
+        }
+
+        .votos {
+            font-size: 80px;
+            color: #FFD700;
+            text-shadow: 3px 3px 0 #000, -2px -2px 0 #000;
+            margin: 10px 0;
+            line-height: 1;
+        }
+
+        /* Caixa de indicação do presente */
+        .presente-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: #111;
+            padding: 8px 16px;
+            border-radius: 10px;
+            margin-top: 5px;
+            font-size: 18px;
+            color: #bbb;
+        }
+
+        /* Imagem do presente */
+        .img-presente {
+            width: 30px;
+            height: 30px;
+            object-fit: contain;
+        }
+
+        .nome-presente {
+            color: #fff;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CARD LULA -->
+    <div class="card">
+        <img class="foto" src="lula.jpg" alt="Lula">
+        <div class="nome">LULA</div>
+        <div id="votos-lula" class="votos">0</div>
+        <div class="presente-box">
+            <span>Mande</span>
+            <img class="img-presente" src="rosa.png" alt="Rosa">
+            <span class="nome-presente">(Rosa)</span>
+        </div>
+    </div>
+
+    <!-- CARD FLÁVIO BOLSONARO -->
+    <div class="card">
+        <img class="foto" src="flavio.jpg" alt="Flávio Bolsonaro">
+        <div class="nome">FLÁVIO BOLSONARO</div>
+        <div id="votos-flavio" class="votos">0</div>
+        <div class="presente-box">
+            <span>Mande</span>
+            <img class="img-presente" src="rosabranca.png" alt="Rosa Branca">
+            <span class="nome-presente">(Rosa Branca)</span>
+        </div>
+    </div>
+
+    <!-- CARD RENAN SANTOS -->
+    <div class="card">
+        <img class="foto" src="renan.jpg" alt="Renan Santos">
+        <div class="nome">RENAN SANTOS</div>
+        <div id="votos-renan" class="votos">0</div>
+        <div class="presente-box">
+            <span>Mande</span>
+            <img class="img-presente" src="gg.png" alt="GG">
+            <span class="nome-presente">(GG)</span>
+        </div>
+    </div>
+
+    <script>
+        let lula = 0;
+        let flavio = 0;
+        let renan = 0;
+
+        const ws = new WebSocket('ws://localhost:8080');
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            
+            if (data.candidato === 'lula') {
+                lula += data.qtd;
+                document.getElementById('votos-lula').innerText = lula;
+            }
+            
+            if (data.candidato === 'flavio') {
+                flavio += data.qtd;
+                document.getElementById('votos-flavio').innerText = flavio;
+            }
+
+            if (data.candidato === 'renan') {
+                renan += data.qtd;
+                document.getElementById('votos-renan').innerText = renan;
+            }
+        };
+    </script>
+</body>
+</html>
