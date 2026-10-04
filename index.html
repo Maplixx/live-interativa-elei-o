@@ -81,6 +81,11 @@
 </head>
 <body>
 
+    <!-- Indicador de status da conexão -->
+    <div id="status" style="position:fixed;bottom:10px;left:50%;transform:translateX(-50%);font-size:14px;color:#f87171;background:#111;padding:5px 14px;border-radius:20px;font-family:monospace;z-index:99;">
+        🔴 Conectando...
+    </div>
+
     <!-- CARD LULA -->
     <div class="card">
         <img class="foto" src="lula.jpg" alt="Lula">
@@ -122,26 +127,72 @@
         let flavio = 0;
         let renan = 0;
 
-        const ws = new WebSocket('ws://localhost:8080');
+        // Conecta via WebSocket no mesmo host/porta que serviu o HTML
+        // Se acessado via http://localhost:3000, conecta em ws://localhost:3000
+        const wsUrl = `ws://${location.host}`;
+        let ws;
 
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            
-            if (data.candidato === 'lula') {
-                lula += data.qtd;
-                document.getElementById('votos-lula').innerText = lula;
-            }
-            
-            if (data.candidato === 'flavio') {
-                flavio += data.qtd;
-                document.getElementById('votos-flavio').innerText = flavio;
-            }
+        function conectar() {
+            ws = new WebSocket(wsUrl);
 
-            if (data.candidato === 'renan') {
-                renan += data.qtd;
-                document.getElementById('votos-renan').innerText = renan;
-            }
-        };
+            ws.onopen = () => {
+                console.log('[WS] Conectado ao servidor!');
+                const status = document.getElementById('status');
+                if (status) {
+                    status.textContent = '🟢 Conectado';
+                    status.style.color = '#4ade80';
+                }
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+
+                if (data.candidato === 'lula') {
+                    lula += data.qtd;
+                    const el = document.getElementById('votos-lula');
+                    el.innerText = lula;
+                    animar(el);
+                }
+
+                if (data.candidato === 'flavio') {
+                    flavio += data.qtd;
+                    const el = document.getElementById('votos-flavio');
+                    el.innerText = flavio;
+                    animar(el);
+                }
+
+                if (data.candidato === 'renan') {
+                    renan += data.qtd;
+                    const el = document.getElementById('votos-renan');
+                    el.innerText = renan;
+                    animar(el);
+                }
+            };
+
+            ws.onclose = () => {
+                console.warn('[WS] Desconectado. Tentando reconectar em 3s...');
+                const status = document.getElementById('status');
+                if (status) {
+                    status.textContent = '🔴 Desconectado (reconectando...)';
+                    status.style.color = '#f87171';
+                }
+                setTimeout(conectar, 3000);
+            };
+
+            ws.onerror = (err) => {
+                console.error('[WS] Erro:', err);
+            };
+        }
+
+        function animar(el) {
+            el.style.transform = 'scale(1.3)';
+            el.style.transition = 'transform 0.15s ease';
+            setTimeout(() => {
+                el.style.transform = 'scale(1)';
+            }, 150);
+        }
+
+        conectar();
     </script>
 </body>
 </html>
